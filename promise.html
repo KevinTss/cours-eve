@@ -9,22 +9,43 @@
   <body>
     <h1>PROMISE</h1>
     <script>
-      const get = function (url) {
+      const get = function (url, success, error) {
         xhr = new XMLHttpRequest();
         xhr.onreadystatechange = function () {
-          if (xhr.readyState === 4 && xhr.status === 200) {
-            return xhr.responseText;
+          if (xhr.readyState === 4 && xhr.status >= 200 && xhr.status < 300) {
+            return success(JSON.parse(xhr.responseText));
+          } else if (xhr.readyState === 4) {
+            return error(xhr);
           }
         };
         xhr.open("GET", url);
         xhr.send();
       };
 
-      let users = null;
+      let user = null;
+      let posts = null;
 
       const getUsers = function () {
-        users = get("https://jsonplaceholder.typicode.com/users");
-        console.log("users", users);
+        get(
+          "https://jsonplaceholder.typicode.com/users/3",
+          function (response) {
+            user = response;
+            get(
+              "https://jsonplaceholder.typicode.com/posts?userId=" +
+                response.id,
+              function (response2) {
+                posts = response2;
+                document.body.innerText = JSON.stringify(response2);
+              },
+              function (obj2) {
+                console.warn(obj2);
+              }
+            );
+          },
+          function (obj) {
+            console.warn(obj);
+          }
+        );
       };
 
       getUsers();
