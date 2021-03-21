@@ -24,22 +24,18 @@
         });
       };
 
-      let user = null;
-      let posts = null;
-
-      const getUsers = function () {
-        get("https://jsonplaceholder.typicode.com/users/3")
-          .then(function (response) {
-            return get(
-              "https://jsonplaceholder.typicode.com/posts?userId=" + response.id
-            );
-          })
-          .then(function (response2) {
-            return (document.body.innerText = JSON.stringify(response2));
-          })
-          .catch(function (obj) {
-            console.warn(obj);
-          });
+      const getUsers = async function () {
+        try {
+          const user = await get(
+            "https://jsonplaceholder.typicode.com/users/3"
+          );
+          const posts = await get(
+            "https://jsonplaceholder.typicode.com/posts?userId=" + user.id
+          );
+          document.body.innerText = JSON.stringify(posts);
+        } catch (error) {
+          console.warn(obj);
+        }
       };
 
       getUsers();
