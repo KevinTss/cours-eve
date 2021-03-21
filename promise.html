@@ -9,43 +9,37 @@
   <body>
     <h1>PROMISE</h1>
     <script>
-      const get = function (url, success, error) {
-        xhr = new XMLHttpRequest();
-        xhr.onreadystatechange = function () {
-          if (xhr.readyState === 4 && xhr.status >= 200 && xhr.status < 300) {
-            return success(JSON.parse(xhr.responseText));
-          } else if (xhr.readyState === 4) {
-            return error(xhr);
-          }
-        };
-        xhr.open("GET", url);
-        xhr.send();
+      const get = function (url) {
+        return new Promise(function (resolve, reject) {
+          xhr = new XMLHttpRequest();
+          xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4 && xhr.status >= 200 && xhr.status < 300) {
+              return resolve(JSON.parse(xhr.responseText));
+            } else if (xhr.readyState === 4) {
+              return reject(xhr);
+            }
+          };
+          xhr.open("GET", url);
+          xhr.send();
+        });
       };
 
       let user = null;
       let posts = null;
 
       const getUsers = function () {
-        get(
-          "https://jsonplaceholder.typicode.com/users/3",
-          function (response) {
-            user = response;
-            get(
-              "https://jsonplaceholder.typicode.com/posts?userId=" +
-                response.id,
-              function (response2) {
-                posts = response2;
-                document.body.innerText = JSON.stringify(response2);
-              },
-              function (obj2) {
-                console.warn(obj2);
-              }
+        get("https://jsonplaceholder.typicode.com/users/3")
+          .then(function (response) {
+            return get(
+              "https://jsonplaceholder.typicode.com/posts?userId=" + response.id
             );
-          },
-          function (obj) {
+          })
+          .then(function (response2) {
+            return (document.body.innerText = JSON.stringify(response2));
+          })
+          .catch(function (obj) {
             console.warn(obj);
-          }
-        );
+          });
       };
 
       getUsers();
